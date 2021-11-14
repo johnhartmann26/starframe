@@ -2,8 +2,32 @@
 import csv
 
 
-# for searching "search" array in "set" array
-# uses: only look into set that has John as name
+def set_players():
+    player_number = 1
+    players = []
+    player = "null"
+    while player != "":
+        player = input(f'Player {player_number} (Leave blank if done)')
+        player_number += 1
+        if player != "":
+            players.append(player)
+    return players
+
+
+def csv_splitter(players):
+    rounds = []
+    card = []
+    with open('UDisc_Scorecards.csv', newline="") as csv_file:
+        scorecard_reader = csv.reader(csv_file, delimiter=',', quotechar='|')
+        for row in scorecard_reader:
+            if row[0] == 'Par':
+                rounds.append(card)
+                card = [row]
+            elif player_filter(players, row, 0):
+                card.append(row)
+    return rounds
+
+
 def player_filter(players, card, index):
     match_found = False
     for player in players:
@@ -12,23 +36,9 @@ def player_filter(players, card, index):
     return match_found
 
 
-def split():
-    rounds = []
-    card = []
+def starframe_counter(rounds, players):
     starframe_count = 0
-    players = ["John", "Felix", "Gunter"]
-    with open('UDisc_Scorecards.csv', newline="") as csvfile:
-        scorecard_reader = csv.reader(csvfile, delimiter=',', quotechar='|')
-
-        for row in scorecard_reader:
-            if row[0] == 'Par':
-                rounds.append(card)
-                card = [row]
-            elif player_filter(players, row, 0):
-                card.append(row)
-
     for card in rounds:
-        # Ignores rounds that do not contain all 'players'
         if len(card) >= len(players) + 1:
             cards_birdies = []
             par = []
@@ -59,9 +69,15 @@ def split():
                 if starframe:
                     starframes.append(hole)
             starframe_count += len(starframes) - 2
+    return starframe_count
 
+
+def main():
+    players = set_players()
+    rounds = csv_splitter(players)
+    starframe_count = starframe_counter(rounds, players)
     print(f'{players} have participated in {starframe_count} total starframes.')
 
 
 if __name__ == '__main__':
-    split()
+    main()
